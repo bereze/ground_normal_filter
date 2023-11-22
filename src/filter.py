@@ -1,6 +1,6 @@
 import numpy as np
 import inekf
-
+from scipy.spatial.transform import Rotation as R
 
 class So3Process(inekf.ProcessModel[inekf.SO3, "Vec3"]):
     def __init__(self, Q):
@@ -34,9 +34,14 @@ class GroundNormalFilterIEKF:
         self.cumulative_rotation = self.cumulative_rotation @ relative_so3
         state = self.iekf.predict(self.u)
         predict_rotation = state.mat.copy()
+        print("predict_rotation:\n", predict_rotation)
+        print("cumulative_rotation:\n", self.cumulative_rotation)
         measure_vector = self.cumulative_rotation[:, 2]
+        print("measure_vector: ", measure_vector)
         self.iekf.update("measure", measure_vector)
         compensation_se3 = np.eye(4, dtype=np.float32)
         compensation_so3 = predict_rotation.T @ self.cumulative_rotation
+        print("compensation_so3:\n", compensation_so3)
+        print("compensation_zxy: ", R.from_matrix(compensation_so3).as_euler('zxy', degrees=True))
         compensation_se3[:3, :3] = compensation_so3
         return compensation_se3

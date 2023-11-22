@@ -58,7 +58,7 @@ class Visualization(object):
         t = np.zeros((3, 1), dtype=np.float32)
         Rt = np.concatenate((R_mat, t), axis=1)
         P = self.output_K @ Rt
-        p0 = (P[0, 2]/P[2, 2], P[1, 2]/P[2, 2])
+        p0 = (P[0, 2]/P[2, 2], P[1, 2]/P[2, 2]) # vp = P * (0, 0, 1)
         p1 = (0, p0[1])
         p2 = (self.output_wh[0], p0[1])
         return np.asarray(p1).astype(int), np.asarray(p2).astype(int)
