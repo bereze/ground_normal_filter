@@ -20,9 +20,9 @@ class Visualization(object):
         self.bev_img_h = 480
         self.bev_img_w = 480
 
-        ipm_height_max_meter = 52
+        ipm_height_max_meter = 80
         ipm_height_min_meter = 10
-        ipm_width_meter = 8
+        ipm_width_meter = 20
         self.camera_height = 2
         self.ipm_region = np.float32([[-ipm_width_meter, ipm_height_max_meter],
                                       [ipm_width_meter, ipm_height_max_meter],
@@ -88,10 +88,13 @@ class Visualization(object):
         start_idx = max(0, idx - self.plot_history_length)
         timestamps = np.arange(start_idx, idx, 1)
         pitch_list = []
+        roll_list = []
         for j in range(start_idx, idx):
             rotation = self.compensation_rotations[j]
             pitch = R.from_matrix(rotation).as_euler('zxy', degrees=True)[1]
             pitch_list.append(pitch)
+            roll = R.from_matrix(rotation).as_euler('zxy', degrees=True)[0]
+            roll_list.append(roll)
         fig, ax1 = plt.subplots(figsize=(4.8, 2.56), dpi=100)
         axes = plt.gca()
         axes.set_ylim([-2, 2])
@@ -99,6 +102,7 @@ class Visualization(object):
         ax1.set_ylabel('pitch (degree)')
         ax1.plot((timestamps, timestamps), ([0] * len(timestamps), pitch_list), c='black')
         ax1.scatter(timestamps, pitch_list, s=10, c='red')
+        ax1.scatter(timestamps, roll_list, s=10, c='yellow')
         plt.tight_layout()
         cv_plot = get_img_from_fig(fig)
         plt.close(fig)

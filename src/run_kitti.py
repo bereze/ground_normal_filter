@@ -83,6 +83,14 @@ if __name__ == "__main__":
     if not isdir(vis_dir):
         mkdir(vis_dir)
 
+    fourcc = cv2.VideoWriter.fourcc('m', 'p', '4', 'v')
+
+    video_filename = "bev_{}.mp4".format(args.sequence)
+    video = cv2.VideoWriter(join(vis_dir, video_filename), fourcc, 30, (960, 736))
+    if not video.isOpened():
+        print("video open failed")
+        exit(0)
+
     # read poses
     sequence = args.sequence
     pose_file = join(args.pose_root, f"{sequence}.txt")
@@ -96,7 +104,7 @@ if __name__ == "__main__":
     # remove last image
     image_ids = image_ids[:-1]
     # image_list start with 000000.png while image_ids start with 1
-    image_list = [image_list[i+1] for i in image_ids]
+    image_list = [image_list[i + 1] for i in image_ids]
 
     # read calibration
     calib_path = join(args.kitti_root, sequence, "calib.txt")
@@ -117,10 +125,12 @@ if __name__ == "__main__":
 
         pitch = R.from_matrix(compensation_so3).as_euler('zxy', degrees=True)[1]
         roll = R.from_matrix(compensation_so3).as_euler('zxy', degrees=True)[0]
-        Rx = R.from_euler('zxy', [0, pitch, 0], degrees=True).as_matrix()
-        print("Rx:\n", Rx)
+        Rx = R.from_euler('zxy', [roll, pitch, 0], degrees=True).as_matrix()
         combined_image = vis.get_frame(image, Rx)
+        video.write(combined_image)
         cv2.imshow("combined", combined_image)
-        cv2.waitKey(0)
+        key = cv2.waitKey(5)
         # output_path = join(vis_dir, f"{idx:06d}.jpg")
         # cv2.imwrite(output_path, combined_image)
+
+    video.release()

@@ -18,7 +18,7 @@ class GroundNormalFilterIEKF:
     def __init__(self):
         cov_init = np.eye(3, dtype=np.float32)
         process_cov = np.eye(3, dtype=np.float32) * 1e-2
-        b = np.asarray([0., 0., 1.])
+        b = np.asarray([0., 1., 0.])
         measure_cov = np.eye(3)
         measure = inekf.MeasureModel[inekf.SO3](b, measure_cov, inekf.ERROR.LEFT)
         process = So3Process(process_cov)
@@ -36,7 +36,7 @@ class GroundNormalFilterIEKF:
         predict_rotation = state.mat.copy()
         print("predict_rotation:\n", predict_rotation)
         print("cumulative_rotation:\n", self.cumulative_rotation)
-        measure_vector = self.cumulative_rotation[:, 2]
+        measure_vector = self.cumulative_rotation[:, 1]
         print("measure_vector: ", measure_vector)
         self.iekf.update("measure", measure_vector)
         compensation_se3 = np.eye(4, dtype=np.float32)
